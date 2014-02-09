@@ -13,6 +13,14 @@ public class GameSetting {
 		treasures = new ArrayList<Treasure>();
 	}
 	
+	public void playerCatchFire(){
+		player.catchFire();
+	}
+	
+	public void playerGrabFortune(int money){
+		player.addFortune(money);
+	}
+	
 	public void playerJoin(Player player){
 		this.player = player;
 	}
