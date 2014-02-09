@@ -6,10 +6,15 @@ public class GameSetting {
 	private ArrayList<Treasure> treasures;
 	private boolean addFireEnabled = false;
 	private boolean addTreasureEnabled = false;
+	private Player player = null;
 	
 	public GameSetting(){
 		fires = new ArrayList<Fire>();
 		treasures = new ArrayList<Treasure>();
+	}
+	
+	public void playerJoin(Player player){
+		this.player = player;
 	}
 	
 	public void addFire(Fire f){
