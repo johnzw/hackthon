@@ -12,13 +12,15 @@ public class Treasure {
 	}
 	
 	public void moneyGenerator(){
-		Random rand = new Random();
-		money = rand.nextInt(50)+50;
+		//Random rand = new Random();
+		money = 50;
 	}
 	
 	//getters and setters
 	public int getMoney() {
-		return money;
+		int m = money;
+		money = 0;
+		return m;
 	}
 	
 	public void setMoney(int money) {

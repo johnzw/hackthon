@@ -1,19 +1,25 @@
 
 public class Player {
 	private Location location;
+	private Cordinate initialCordinate;
 	private final static int FULLHP = 100;
 	private final static int ZEROHP = 0;
 	private int HP;
 	private int Fortune;
 	
-	public Player(int x, int y){
+	public Player(Cordinate cordinate, int x, int y){
+		this.initialCordinate = cordinate;
 		location = new Location(x, y);
 		HP = FULLHP;
 		Fortune = 0;
 	}
 	
+	public Cordinate getInitialCordinate() {
+		return initialCordinate;
+	}
+
 	public void catchFire(){
-		HP = HP -20;
+		HP = HP -2;
 	}
 	
 	public void addFortune(int money){

@@ -14,11 +14,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+
+import com.google.gson.Gson;
 
 public class UI extends JFrame implements MouseListener {
 
@@ -30,12 +33,17 @@ public class UI extends JFrame implements MouseListener {
 	private ServerSocket serverSocket;
 	private static final int SERVERPORT = 10000;
 	Thread serverThread = null;
+	public static int HEIGHT = 600;
+	public static int WIDTH = 650;
+	
+	//it's for test
+	public int testnumberOfCom =0;
 
 	// constructor, basically setting the UIs
 	public UI() {
 		super();
 
-		this.setSize(650, 600);
+		this.setSize(WIDTH, HEIGHT);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setResizable(false);
 		centered(this);
@@ -69,7 +77,7 @@ public class UI extends JFrame implements MouseListener {
 		this.setJMenuBar(menuBar);
 		this.addMouseListener(this);
 		
-		startInternetService();
+		//startInternetService();
 	}
 
 	private void centered(Container container) {
@@ -88,30 +96,98 @@ public class UI extends JFrame implements MouseListener {
 
 	public static void main(String[] args) {
 		UI ui = new UI();
+		
+		try {
+			Thread.sleep(12000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		for(int i=0;i<100;i++){
+		try {
+			Thread.sleep(800);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ui.test(100.00000+0.00001*i, 100.00000+0.00001*i);
+		}
 	}
 
 	public void paint(int x, int y) {
 		Graphics g = this.getGraphics();
 		if (gameSetting.isAddFireEnabled()) {
 			g.setColor(Color.red);
-			g.drawOval(x, y, 10, 10);
+			g.fillOval(x, y, 30, 30);
 			g.dispose();
 			gameSetting.addFire(new Fire(x, y));
-			gameSetting.blockAdding();
-		} else if (gameSetting.isAddTreasureEnabled()) {
+			gameSetting.setAddFireEnabled(false);
+		} 
+		else if (gameSetting.isAddTreasureEnabled()) {
 			g.setColor(Color.YELLOW);
 			g.setFont(new Font("Engravers MT", Font.BOLD, 1000));
-			g.drawOval(x, y, 10, 10);
+			g.fillOval(x, y, 30, 30);
 
 			g.dispose();
 			gameSetting.addTreasure(new Treasure(x, y));
-			gameSetting.blockAdding();
-
+			gameSetting.setAddTreasureEnabled(false);
 		}
+	}
+	
+	public void repaint(int x, int y){
+		Graphics g = this.getGraphics();
+		if (gameSetting.isAddFireEnabled()) {
+			g.setColor(Color.red);
+			g.fillOval(x, y, 30, 30);
+			g.dispose();
+			
+			gameSetting.setAddFireEnabled(false);
+		} 
+		if (gameSetting.isAddTreasureEnabled()) {
+			g.setColor(Color.YELLOW);
+			g.setFont(new Font("Engravers MT", Font.BOLD, 1000));
+			g.fillOval(x, y, 30, 30);
+
+			g.dispose();
+			
+			gameSetting.setAddTreasureEnabled(false);
+		}
+		if(gameSetting.isDrawPlayerEnabled()){
+			g.setColor(Color.gray);
+			g.setFont(new Font("Engravers MT", Font.BOLD, 1000));
+			g.fillOval(x, y, 30, 30);
+
+			g.dispose();
+		}
+	}
+	public void reDraw(){
+		Graphics g = this.getGraphics();
+		g.clearRect(0, menuBar.getHeight(), WIDTH, HEIGHT);
+		
+		//draw fire
+		ArrayList<Fire> fire = gameSetting.getFires();
+		for(int i=0; i<fire.size();i++){
+			gameSetting.setAddFireEnabled(true);
+			repaint(fire.get(i).getLocation().getX(), fire.get(i).getLocation().getY());
+		}
+		
+		//draw treasure
+		ArrayList<Treasure> treasure = gameSetting.getTreasures();
+		for(int i=0; i<treasure.size();i++){
+			gameSetting.setAddTreasureEnabled(true);
+			repaint(treasure.get(i).getLocation().getX(), treasure.get(i).getLocation().getY());
+		}
+		
+		//draw player
+		Player player = gameSetting.getPlayer();
+		System.out.println(player.getLocation().getX()+","+ player.getLocation().getY());
+		gameSetting.setDrawPlayerEnabled(true);
+		repaint(player.getLocation().getX(), player.getLocation().getY());
+		gameSetting.setDrawPlayerEnabled(false);
+		
 	}
 
 	class ServerThread implements Runnable {
-
 		// invoked when thread start
 		public void run() {
 			Socket socket = null;
@@ -132,8 +208,21 @@ public class UI extends JFrame implements MouseListener {
 			}
 		}
 	}
-
+	
+	
+	public void test(double x, double y){
+		testnumberOfCom++;
+		Cordinate c = new Cordinate(x,y);
+		
+		Gson gson = new Gson();
+		String read = gson.toJson(c);
+		LogicProcess.compute(gameSetting, read, testnumberOfCom);
+		gameSetting = LogicProcess.gameSetting;
+		reDraw();
+		System.out.println(gameSetting.warning);
+	}
 	class CommunicationThread implements Runnable {
+		private long numberOfCom =0;
 		private Socket clientSocket;
 		private BufferedReader input;
 		public CommunicationThread(Socket clientSocket) {
@@ -150,6 +239,10 @@ public class UI extends JFrame implements MouseListener {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
 					String read = input.readLine();
+					numberOfCom++;
+					LogicProcess.compute(gameSetting, read, numberOfCom);
+					gameSetting = LogicProcess.gameSetting;
+					reDraw();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

@@ -7,6 +7,11 @@ public class Location {
 		this.x =x;
 		this.y =y;
 	}
+	
+	public long distanceSquared(Location loc){
+		return (loc.getX()-this.getX())*(loc.getX()-this.getX())+
+				(loc.getY()-this.getY())*(loc.getY()-this.getY());
+	}
 
 	public int getX() {
 		return x;
